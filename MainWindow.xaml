@@ -8,22 +8,24 @@
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    
+    <Window.Resources>
+        <local:SceneViewModel x:Key="SceneViewModel" />
+    </Window.Resources>
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
-            <Button x:Name="ButtonGo"
-              DockPanel.Dock="Right"
-              Click="ButtonGo_Click"
-              Content="Go"
-    />
-            <TextBox Name="addressBar"/>
+            <Button x:Name="ButtonGo" DockPanel.Dock="Right" Click="ButtonGo_Click" Content="Go"/>
+            <TextBox Name = "addressBar"/>
         </DockPanel>
-
         <Grid>
-            <esri:MapView x:Name="MapView" Margin="5" Width="400"/>
+            <esri:SceneView x:Name="MainSceneView"
+                        Scene="{Binding Scene, Source={StaticResource SceneViewModel}}" />
         </Grid>
-        <wv2:WebView2 x:Name="webView"
-                  Source="https://www.microsoft.com" Width="367"
-   />
+        <wv2:WebView2 Name = "webView"
+                  Source = "https://www.microsoft.com"
+    />
     </DockPanel>
+
+
+
+
 </Window>
