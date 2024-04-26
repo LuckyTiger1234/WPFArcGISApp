@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFArcGISApp"
+        xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
@@ -17,8 +18,12 @@
     />
             <TextBox Name="addressBar"/>
         </DockPanel>
-        <wv2:WebView2 Name="webView"
-                  Source="https://www.microsoft.com"
+
+        <Grid>
+            <esri:MapView x:Name="MapView" Margin="5" Width="400"/>
+        </Grid>
+        <wv2:WebView2 x:Name="webView"
+                  Source="https://www.microsoft.com" Width="367"
    />
     </DockPanel>
 </Window>
