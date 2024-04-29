@@ -12,6 +12,8 @@ using Esri.ArcGISRuntime.Mapping;
 using Esri.ArcGISRuntime.UI.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
+using WPFArcGISApp.ViewModel;
+using Esri.ArcGISRuntime.Geometry;
 namespace WPFArcGISApp
 {
     /// <summary>
@@ -20,45 +22,37 @@ namespace WPFArcGISApp
     public partial class MainWindow : Window
     {
         // arcgis map
-
-        // webview2
         public MainWindow()
         {
             InitializeComponent();
-            webView.NavigationStarting += EnsureHttps;
-            InitializeAsync();
-        }
-        async void InitializeAsync()
-        {
-            await webView.EnsureCoreWebView2Async(null);
-            webView.CoreWebView2.WebMessageReceived += UpdateAddressBar;
 
-            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.postMessage(window.document.URL);");
-            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.addEventListener(\'message\', event => alert(event.data));");
-        }
-        void UpdateAddressBar(object sender, CoreWebView2WebMessageReceivedEventArgs args)
-        {
-            String uri = args.TryGetWebMessageAsString();
-            addressBar.Text = uri;
-            webView.CoreWebView2.PostWebMessageAsString(uri);
-        }
-        void ButtonGo_Click(object sender, RoutedEventArgs e)
-        {
-            if (webView != null && webView.CoreWebView2 != null)
-            {
-                webView.CoreWebView2.Navigate(addressBar.Text);
-            }
-        }
-        void EnsureHttps(object sender, CoreWebView2NavigationStartingEventArgs args)
-        {
-            String uri = args.Uri;
-            if (!uri.StartsWith("https://"))
-            {
-                webView.CoreWebView2.ExecuteScriptAsync($"alert('{uri} is not safe, try an https link')");
-                args.Cancel = true;
-            }
+            // Create a new scene with an imagery basemap.
+            Scene scene = new Scene(BasemapStyle.ArcGISImageryStandard);
+            string elevationServiceUrl = "http://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
+            ArcGISTiledElevationSource elevationSource = new ArcGISTiledElevationSource(new Uri(elevationServiceUrl));
+            Surface elevationSurface = new Surface();
+            elevationSurface.ElevationSources.Add(elevationSource);
+            elevationSurface.ElevationExaggeration = 2.5;
+            scene.BaseSurface = elevationSurface;
+            MapPoint cameraLocation = new MapPoint(-118.804, 33.909, 5330.0, SpatialReferences.Wgs84);
+
+            Camera sceneCamera = new Camera(locationPoint: cameraLocation,
+                                  heading: 355.0,
+                                  pitch: 72.0,
+                                  roll: 0.0);
+
+            MapPoint sceneCenterPoint = new MapPoint(-118.805, 34.027, SpatialReferences.Wgs84);
+
+            // Set an initial viewpoint for the scene using the camera and observation point.
+            Viewpoint initialViewpoint = new Viewpoint(sceneCenterPoint, sceneCamera);
+            scene.InitialViewpoint = initialViewpoint;
+
+            MainSceneView.Scene = scene;
+
+            SceneViewModel sceneViewModel = new SceneViewModel(MainSceneView);
+            this.DataContext = sceneViewModel;
         }
 
-  
+
     }
 }
