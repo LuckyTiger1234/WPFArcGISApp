@@ -7,7 +7,7 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="900" Width="1600">
     <Window.Resources>
         <local:SceneViewModel x:Key="SceneViewModel" />
         <Style x:Key="ButtonStyle" TargetType="Button">
@@ -22,17 +22,29 @@
             <Setter Property="VerticalAlignment" Value="Top" />
             <Setter Property="Padding" Value="5" />
         </Style>
+        <Style x:Key="WebViewStyle" TargetType="wv2:WebView2">
+            <Setter Property="Width" Value="400" />
+            <Setter Property="Height" Value="300" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
     </Window.Resources>
 
     <DockPanel>
         <Grid>
-            <esri:SceneView x:Name="MainSceneView"  />
+            <esri:SceneView x:Name="MainSceneView"
+                            Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
+                            />
             <Button x:Name="DrawLine" Content="画线" 
                     Command="{Binding DrawLineCommand}" 
-                    Style="{StaticResource ButtonStyle}" />
+                    Style="{StaticResource ButtonStyle}" 
+                    Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top"
+                    />
+            <wv2:WebView2 Name="webView"
+                          Source="http://www.baidu.com"
+                          Style="{StaticResource WebViewStyle}"
+                          Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+            />
         </Grid>
-        <!--<wv2:WebView2 Name = "webView"
-                  Source = "https://www.microsoft.com"
-        />-->
     </DockPanel>
 </Window>

@@ -1,30 +1,23 @@
-﻿using System.Text;
+﻿
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Esri.ArcGISRuntime.Mapping;
-using Esri.ArcGISRuntime.UI.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
 using WPFArcGISApp.ViewModel;
 using Esri.ArcGISRuntime.Geometry;
+using System.IO;
 namespace WPFArcGISApp
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         // arcgis map
         public MainWindow()
         {
             InitializeComponent();
+
+            // 初始化webview
+            string openUrl = Directory.GetCurrentDirectory() + "/EchartWebView.html";
+            webView.Source = new Uri(openUrl);
 
             // Create a new scene with an imagery basemap.
             Scene scene = new Scene(BasemapStyle.ArcGISImageryStandard);
@@ -49,10 +42,13 @@ namespace WPFArcGISApp
 
             MainSceneView.Scene = scene;
 
-            SceneViewModel sceneViewModel = new SceneViewModel(MainSceneView);
+            webView.Visibility = Visibility.Collapsed;
+            webView.EnsureCoreWebView2Async();
+
+            WebViewModel webViewModel = new WebViewModel(webView);
+            SceneViewModel sceneViewModel = new SceneViewModel(MainSceneView, elevationSurface, webView);
             this.DataContext = sceneViewModel;
+
         }
-
-
     }
 }

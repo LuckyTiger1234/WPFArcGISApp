@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-
 using System;
 using System.Collections.Generic;
-using System.Text;
-
 using Esri.ArcGISRuntime.Geometry;
 using Esri.ArcGISRuntime.Mapping;
 using System.ComponentModel;
@@ -14,6 +11,10 @@ using Esri.ArcGISRuntime.UI;
 using Esri.ArcGISRuntime.UI.Controls;
 using Esri.ArcGISRuntime.Symbology;
 using System.Drawing;
+using System.Linq;
+using Microsoft.Web.WebView2.Wpf;
+
+using Newtonsoft.Json;
 
 namespace WPFArcGISApp.ViewModel
 {
@@ -21,20 +22,27 @@ namespace WPFArcGISApp.ViewModel
     class SceneViewModel : INotifyPropertyChanged
     {
         private SceneView _sceneView;
+        private Surface _surface;
+        private WebView2 _webView;
         // 创建图层，保存Polyline Graphic
         private GraphicsOverlay LineOverlay;
         private MapPoint _startPoint;
         private MapPoint _endPoint;
         private bool _isDrawingLine = false;
+
         // 绑定按钮点击事件
         public ICommand DrawLineCommand { get; private set; }
 
-        public SceneViewModel(SceneView sceneView)
+        public SceneViewModel(SceneView sceneView, Surface elevationSurface, WebView2 webView)
         {
             _sceneView = sceneView;
+            _surface = elevationSurface;
+            _webView = webView;
+
             LineOverlay = new GraphicsOverlay();
             DrawLineCommand = new RelayCommand(DrawLine);
             _sceneView.MouseUp += OnSceneViewMouseUp;
+
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -79,24 +87,24 @@ namespace WPFArcGISApp.ViewModel
                 _endPoint = clickedPoint;
 
                 // 绘制线条
-                // 创建 PolylineBuilder
                 PolylineBuilder polylineBuilder = new PolylineBuilder(SpatialReferences.Wgs84);
 
-                // 添加起点和终点
                 polylineBuilder.AddPoint(_startPoint);
                 polylineBuilder.AddPoint(_endPoint);
 
                 // 创建 Polyline
                 Polyline polyline = polylineBuilder.ToGeometry();
 
+                // 获取线的剖面信息
+                getElevationfromLine(polyline, 100);
+
                 // 将线条添加到图层中
                 SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.Red, 2);
-                // 创建Graphic并添加到GraphicsOverlay
                 Graphic lineGraphic = new Graphic(polyline, lineSymbol);
-                // 设置线条 Graphic 的 SurfacePlacement 为 Draped
-                //LineOverlay.SceneProperties.SurfacePlacement = SurfacePlacement.Draped;
+
                 LineOverlay.Graphics.Add(lineGraphic);
                 _sceneView.GraphicsOverlays.Add(LineOverlay);
+
 
                 // 重置状态变量和起点终点
                 _isDrawingLine = false;
@@ -105,35 +113,38 @@ namespace WPFArcGISApp.ViewModel
             }
         }
 
-        // 点击按钮画线事件
-        //private void DrawLine_Click()
-        //{
+        /// <summary>
+        /// 对polyline直线按照线性插值，取线上的点的高程
+        /// </summary>
+        /// <param name="line">polyline 线</param>
+        /// <param name="pointsNum">int 插值数量</param>
+        private async void getElevationfromLine(Polyline line, int pointsNum)
+        {
+            List<double> elevations = new List<double>();
+            // 计算插值步长
+            double step = line.Length() / (pointsNum - 1);
 
-        //    _isDrawingLine = true;
-        //    // 添加鼠标点击事件监听器
-        //    //sceneView.Mouse
+            for(int i=0; i < pointsNum; i++)
+            {
+                // 计算当前插值点的位置
+                double distance = step * i;
+                MapPoint interpolatedPoint = GeometryEngine.Project(
+                    GeometryEngine.CreatePointAlong(line, distance),
+                    SpatialReferences.Wgs84) as MapPoint;
+                // 获取插值点的高程信息
+                double elevation = await _surface.GetElevationAsync(interpolatedPoint);
+                elevations.Add(elevation);
+            }
+            Console.WriteLine("\"length\"",elevations.Count);
 
-        //    // 创建 PolylineBuilder
-        //    PolylineBuilder polylineBuilder = new PolylineBuilder(SpatialReferences.Wgs84);
 
-        //    // 创建线条的几何体
-        //    List<MapPoint> points = new List<MapPoint>
-        //    {
-        //        new MapPoint(-116.804, 33.909),
-        //        new MapPoint(-119.804, 32.909),
-        //        // 添加更多点来定义线条路径
-        //    };
-        //    Polyline polyline = new PolylineBuilder(points).ToGeometry();
-        //    // 设置线条符号
-        //    SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.Red, 2);
-        //    // 创建Graphic并添加到GraphicsOverlay
-        //    Graphic lineGraphic = new Graphic(polyline, lineSymbol);
-        //    // 设置线条 Graphic 的 SurfacePlacement 为 Draped
-        //    //LineOverlay.SceneProperties.SurfacePlacement = SurfacePlacement.Draped;
-        //    LineOverlay.Graphics.Add(lineGraphic);
-        //    _sceneView.GraphicsOverlays.Add(LineOverlay);
-        //    MessageBox.Show("Draw Line button clicked!");
-        //}
+            _webView.Visibility = Visibility.Visible;
+
+            // 将海拔数据传递给 WebView2，并绘制折线图
+            String script = $"drawElevationChart({JsonConvert.SerializeObject(elevations)})";
+            await _webView.ExecuteScriptAsync(script);
+        }
+
     }
 
 }
