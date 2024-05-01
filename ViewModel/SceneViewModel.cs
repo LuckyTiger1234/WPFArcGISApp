@@ -24,14 +24,34 @@ namespace WPFArcGISApp.ViewModel
         private SceneView _sceneView;
         private Surface _surface;
         private WebView2 _webView;
+
+
         // 创建图层，保存Polyline Graphic
         private GraphicsOverlay LineOverlay;
         private MapPoint _startPoint;
         private MapPoint _endPoint;
+
+        // 通过该变量控制绘制状态
         private bool _isDrawingLine = false;
+
+        private string _buttonContent = "剖面分析工具";
+        // 绑定button content
+        public string ButtonContent
+        {
+            get { return _buttonContent; }
+            set
+            {
+                if (_buttonContent != value)
+                {
+                    _buttonContent = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         // 绑定按钮点击事件
         public ICommand DrawLineCommand { get; private set; }
+        public ICommand ClearLineCommand { get; private set; }
 
         public SceneViewModel(SceneView sceneView, Surface elevationSurface, WebView2 webView)
         {
@@ -40,7 +60,9 @@ namespace WPFArcGISApp.ViewModel
             _webView = webView;
 
             LineOverlay = new GraphicsOverlay();
+            // 绑定butoon事件
             DrawLineCommand = new RelayCommand(DrawLine);
+            // 绑定对球操作事件
             _sceneView.MouseUp += OnSceneViewMouseUp;
 
         }
@@ -51,20 +73,26 @@ namespace WPFArcGISApp.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private Scene? _scene;
-        public Scene? Scene
-        {
-            get { return _scene; }
-            set
-            {
-                _scene = value;
-                OnPropertyChanged();
-            }
-        }
-
         private void DrawLine()
         {
-            _isDrawingLine = true;
+            if (ButtonContent == "清除") 
+            { 
+                // 清除
+                _sceneView.GraphicsOverlays.Remove(LineOverlay);
+                // 重置状态变量和起点终点
+                _isDrawingLine = false;
+                _startPoint = null;
+                _endPoint = null;
+                LineOverlay = new GraphicsOverlay();
+                _webView.Visibility = Visibility.Collapsed;
+                ButtonContent = "剖面分析工具";
+            }
+            else
+            {
+                // 绘制
+                _isDrawingLine = true;
+            }
+
         }
 
 
@@ -75,7 +103,6 @@ namespace WPFArcGISApp.ViewModel
 
             // 获取鼠标点击的地理坐标点
             MapPoint clickedPoint = await _sceneView.ScreenToLocationAsync(e.GetPosition(_sceneView));
-
             if (_startPoint == null)
             {
                 // 第一次点击，设置起点
@@ -88,10 +115,8 @@ namespace WPFArcGISApp.ViewModel
 
                 // 绘制线条
                 PolylineBuilder polylineBuilder = new PolylineBuilder(SpatialReferences.Wgs84);
-
                 polylineBuilder.AddPoint(_startPoint);
                 polylineBuilder.AddPoint(_endPoint);
-
                 // 创建 Polyline
                 Polyline polyline = polylineBuilder.ToGeometry();
 
@@ -105,11 +130,8 @@ namespace WPFArcGISApp.ViewModel
                 LineOverlay.Graphics.Add(lineGraphic);
                 _sceneView.GraphicsOverlays.Add(LineOverlay);
 
-
-                // 重置状态变量和起点终点
                 _isDrawingLine = false;
-                _startPoint = null;
-                _endPoint = null;
+                ButtonContent = "清除";
             }
         }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <title>Elevation LineChart</title>
@@ -8,11 +8,11 @@
 </head>
 
 <body>
-    <div class="title">剖面图</div>
+    <div class="title"><p>剖面图</p></div>
     <!-- ��ʾ����ͼ�� Canvas Ԫ�� -->
     <canvas id="elevationChart"></canvas>
     <script>
-        // ����һ����������ͼ�ĺ���
+        // 绘制折线图
         function drawElevationChart(elevationData) {
             var ctx = document.getElementById('elevationChart').getContext('2d');
             var myChart = new Chart(ctx, {
@@ -21,7 +21,7 @@
                     labels: Array.from(Array(elevationData.length).keys()), // ʹ��������Ϊ�����ǩ
                     datasets: [{
                         label: '海拔',
-                        data: elevationData + 'm',
+                        data: elevationData ,
                         fill: false,
                         borderColor: 'rgb(75, 192, 192)',
                         tension: 0.1

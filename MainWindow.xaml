@@ -35,7 +35,7 @@
             <esri:SceneView x:Name="MainSceneView"
                             Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
                             />
-            <Button x:Name="DrawLine" Content="画线" 
+            <Button x:Name="DrawLine" Content="{Binding ButtonContent}" 
                     Command="{Binding DrawLineCommand}" 
                     Style="{StaticResource ButtonStyle}" 
                     Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top"
