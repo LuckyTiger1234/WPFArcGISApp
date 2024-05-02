@@ -28,6 +28,10 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <Style x:Key="loadingBarStyle" TargetType="ProgressBar">
+            <Setter Property="Width" Value="150" />
+            <Setter Property="Height" Value="50" />
+        </Style>
     </Window.Resources>
 
     <DockPanel>
@@ -38,8 +42,16 @@
             <Button x:Name="DrawLine" Content="{Binding ButtonContent}" 
                     Command="{Binding DrawLineCommand}" 
                     Style="{StaticResource ButtonStyle}" 
-                    Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top"
-                    />
+                    Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top">
+            </Button>
+
+            <Grid Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar x:Name="loadingBar" IsIndeterminate="True" Visibility="Collapsed" 
+                             Width="200" Height="20" 
+                             />
+                <TextBlock x:Name="loadingText" Text="计算中..." Visibility="Collapsed" />
+            </Grid>
+            
             <wv2:WebView2 Name="webView"
                           Source="http://www.baidu.com"
                           Style="{StaticResource WebViewStyle}"

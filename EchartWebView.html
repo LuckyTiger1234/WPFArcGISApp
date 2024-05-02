@@ -12,30 +12,36 @@
     <!-- ��ʾ����ͼ�� Canvas Ԫ�� -->
     <canvas id="elevationChart"></canvas>
     <script>
-        // 绘制折线图
-        function drawElevationChart(elevationData) {
-            var ctx = document.getElementById('elevationChart').getContext('2d');
-            var myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array.from(Array(elevationData.length).keys()), // ʹ��������Ϊ�����ǩ
-                    datasets: [{
-                        label: '海拔',
-                        data: elevationData ,
-                        fill: false,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
+        // 初始化echarts
+        var ctx = document.getElementById('elevationChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '海拔',
+                    data: [],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
                     }
                 }
-            });
+            }
+        });
+
+        // 接收array更新echarts
+        function drawElevationChart(elevationData) {
+            // 更新数据
+            myChart.data.datasets[0].data = elevationData;
+            myChart.data.labels = new Array(elevationData.length).fill().map((_, index) => index + 1);
+            myChart.update(); // 更新图表
         }
     </script>
 </body>

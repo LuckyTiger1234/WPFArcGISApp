@@ -46,7 +46,7 @@ namespace WPFArcGISApp
             webView.EnsureCoreWebView2Async();
 
             WebViewModel webViewModel = new WebViewModel(webView);
-            SceneViewModel sceneViewModel = new SceneViewModel(MainSceneView, elevationSurface, webView);
+            SceneViewModel sceneViewModel = new SceneViewModel(MainSceneView, elevationSurface, webView, loadingBar, loadingText);
             this.DataContext = sceneViewModel;
 
         }
