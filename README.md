@@ -17,7 +17,7 @@
 
 ## 注意事项：
 1.安装完Arcgis Map SDK nuget后，出现报错：The 'Esri.ArcGISRuntime.WPF' nuget package cannot be used to target 'net8.0-windows'. Target 'net8.0-windows10.0.19041.0' or later instead。
-解决方法：右击项目，编辑选择项目文件，更新 <TargetFramework> element with net8.0-windows10.0.19041.0 （或更高版本）    
+解决方法：右击项目，编辑选择项目文件，更新 <TargetFramework> element with net8.0-windows10.0.19041.0 （或更高版本）
 
 
 2.运行后，如出现WebView控件找不到资源文件，需手动把EchartWebView.html文件复制到与exe同级目录下。    
