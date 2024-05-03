@@ -8,9 +8,12 @@
 </head>
 
 <body>
-    <div class="title"><p>剖面图</p></div>
-    <!-- ��ʾ����ͼ�� Canvas Ԫ�� -->
-    <canvas id="elevationChart"></canvas>
+    <!-- echarts折线图 -->
+    <canvas id="elevationChart" width="550" height="250"></canvas>
+    <!-- 统计数据 -->
+    <div id="statics_warpper">
+        <p>Elevation: Max: <span id="maxElevation"></span>(m), Min: <span id="minElevation"></span>(m), Avg: <span id="avgElevation"></span>(m), Gain: <span id="gainElevation"></span>(m), Loss: <span id="lossElevation"></span>(m)</p>
+    </div>
     <script>
         // 初始化echarts
         var ctx = document.getElementById('elevationChart').getContext('2d');
@@ -27,21 +30,48 @@
                 }]
             },
             options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Elevation profile'
+                    }
+                },
                 responsive: true,
                 scales: {
                     y: {
-                        beginAtZero: false
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Distance(m)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Distance(m)'
+                        }
                     }
                 }
             }
         });
 
-        // 接收array更新echarts
-        function drawElevationChart(elevationData) {
+        // 更新echarts
+        function drawElevationChart(elevationData, distancesData) {
+
             // 更新数据
             myChart.data.datasets[0].data = elevationData;
-            myChart.data.labels = new Array(elevationData.length).fill().map((_, index) => index + 1);
+            myChart.data.labels = distancesData;
+
             myChart.update(); // 更新图表
+        }
+
+        // 更新statics
+        const updateStatics = (max, min, avg, gain, loss) => {
+            document.getElementById('maxElevation').innerText = max;
+            document.getElementById('minElevation').innerText = min;
+            document.getElementById('avgElevation').innerText = avg;
+            document.getElementById('gainElevation').innerText = gain;
+            document.getElementById('lossElevation').innerText = loss;
         }
     </script>
 </body>

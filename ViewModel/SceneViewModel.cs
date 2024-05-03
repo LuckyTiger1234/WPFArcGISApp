@@ -16,6 +16,7 @@ using Microsoft.Web.WebView2.Wpf;
 
 using Newtonsoft.Json;
 using System.Windows.Controls;
+using System.Net;
 
 namespace WPFArcGISApp.ViewModel
 {
@@ -168,6 +169,8 @@ namespace WPFArcGISApp.ViewModel
         private async void getElevationfromLine(Polyline line, int pointsNum)
         {
             List<double> elevations = new List<double>();
+            List<int> distances = new List<int>();
+
             // 计算插值步长
             double step = line.Length() / (pointsNum - 1);
 
@@ -181,21 +184,54 @@ namespace WPFArcGISApp.ViewModel
                 MapPoint interpolatedPoint = GeometryEngine.Project(
                     GeometryEngine.CreatePointAlong(line, distance),
                     SpatialReferences.Wgs84) as MapPoint;
+                
                 // 获取插值点的高程信息
                 double elevation = await _surface.GetElevationAsync(interpolatedPoint);
+                GeodeticDistanceResult distanceResult = GeometryEngine.DistanceGeodetic(_startPoint, interpolatedPoint, null, null, GeodeticCurveType.Geodesic);
+                int distanceInt = (int) distanceResult.Distance;
+                elevation = Math.Round(elevation, 2);
                 elevations.Add(elevation);
+                distances.Add(distanceInt);
             }
             Console.WriteLine("\"length\"",elevations.Count);
 
+            // 计算统计数据
+
+            // 将海拔数据传递给 WebView2，并绘制折线图
+            String script = $"drawElevationChart({JsonConvert.SerializeObject(elevations)},{JsonConvert.SerializeObject(distances)} );" +
+                $"updateStatics({elevations.Max()},{elevations.Min()},{Math.Round(elevations.Average())},{Math.Round(CalculateGain(elevations), 2)},{Math.Round(CalculateLoss(elevations), 2)})";
+            await _webView.ExecuteScriptAsync(script);
 
             _webView.Visibility = Visibility.Visible;
             _loadingBar.Visibility = Visibility.Collapsed;
             _loadingText.Visibility = Visibility.Collapsed;
-
-            // 将海拔数据传递给 WebView2，并绘制折线图
-            String script = $"drawElevationChart({JsonConvert.SerializeObject(elevations)})";
-            await _webView.ExecuteScriptAsync(script);
         }
+
+        // 计算gain
+        static double CalculateGain(List<double> numbers)
+        {
+            double gain = 0;
+            for (int i = 1; i < numbers.Count; i++)
+            {
+                double diff = numbers[i] - numbers[i - 1];
+                if (diff > 0)
+                    gain += diff;
+            }
+            return gain;
+        }
+        // 计算loss
+        static double CalculateLoss(List<double> numbers)
+        {
+            double loss = 0;
+            for (int i = 1; i < numbers.Count; i++)
+            {
+                double diff = numbers[i] - numbers[i - 1];
+                if (diff < 0)
+                    loss -= diff; // 取负数表示减少值的总和
+            }
+            return loss;
+        }
+
     }
 }
 

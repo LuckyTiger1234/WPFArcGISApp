@@ -9,11 +9,11 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="900" Width="1600">
     <Window.Resources>
-        <local:SceneViewModel x:Key="SceneViewModel" />
+        <!--<local:SceneViewModel x:Key="SceneViewModel" />-->
         <Style x:Key="ButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="100" />
             <Setter Property="Height" Value="50" />
-            <Setter Property="Margin" Value="10" />
+            <Setter Property="Margin" Value="20" />
             <Setter Property="Background" Value="LightBlue" />
             <Setter Property="Foreground" Value="Black" />
             <Setter Property="BorderBrush" Value="Black" />
@@ -23,8 +23,8 @@
             <Setter Property="Padding" Value="5" />
         </Style>
         <Style x:Key="WebViewStyle" TargetType="wv2:WebView2">
-            <Setter Property="Width" Value="400" />
-            <Setter Property="Height" Value="300" />
+            <Setter Property="Width" Value="700" />
+            <Setter Property="Height" Value="400" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
