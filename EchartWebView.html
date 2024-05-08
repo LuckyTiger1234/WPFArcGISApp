@@ -30,15 +30,36 @@
                 }]
             },
             options: {
+                onClick: (e, chartElement) => {
+                    console.log(chartElement[0]);
+                    console.log(chartElement[0].index);
+
+                    if (chartElement.length > 0) {
+                        // 获取鼠标所在点的索引
+                        var index = chartElement[0].index;
+                        // 获取该点的数据
+                        var dataset = myChart.data.datasets[chartElement[0].datasetIndex];
+                        var value = dataset.data[index];
+
+                        alert(index)
+                        window.chrome.webview.postMessage(index.toString());
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
                         text: 'Elevation profile'
                     }
+
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
                 },
                 responsive: true,
                 scales: {
                     y: {
+                        display:true,
                         beginAtZero: false,
                         title: {
                             display: true,
@@ -46,6 +67,7 @@
                         }
                     },
                     x: {
+                        display: true,
                         title: {
                             display: true,
                             text: 'Distance(m)'
