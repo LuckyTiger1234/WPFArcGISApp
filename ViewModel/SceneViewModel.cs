@@ -30,14 +30,19 @@ namespace WPFArcGISApp.ViewModel
         private TextBlock _loadingText;
 
         // 创建图层，保存Polyline Graphic
-        private GraphicsOverlay _LineOverlay;
-        private GraphicsOverlay _PointOverlay;
-        private List<MapPoint> _clickedPoints = new List<MapPoint>();
+        static private GraphicsOverlay _LineOverlay = new GraphicsOverlay();
+        static private GraphicsOverlay _PointOverlay = new GraphicsOverlay();
+        static private GraphicsOverlay _onHoverPointOverlay = new GraphicsOverlay();
 
-        // 差值点
-        private List<MapPoint> _interpolatePoints = new List<MapPoint>();
-        private List<double> _elevations = new List<double>();
-        private List<int> _distances = new List<int>();
+        // 点击生成的点
+        static private List<MapPoint> _clickedPoints = new List<MapPoint>();
+        // onHover的点
+        static private MapPoint _onHoverPoint;
+
+        // 插值点
+        static private List<MapPoint> _interpolatePoints = new List<MapPoint>();
+        static private List<double> _elevations = new List<double>();
+        static private List<int> _distances = new List<int>();
 
         // 通过该变量控制绘制状态
         private bool _isDrawingLine = false;
@@ -74,11 +79,9 @@ namespace WPFArcGISApp.ViewModel
             _loadingBar = progressBar;
             _loadingText = textBlock;
 
-            _LineOverlay = new GraphicsOverlay();
-            _PointOverlay = new GraphicsOverlay();
-
             // 添加点图层到场景视图
             _sceneView.GraphicsOverlays.Add(_PointOverlay);
+            _sceneView.GraphicsOverlays.Add(_onHoverPointOverlay);
             _sceneView.GraphicsOverlays.Add(_LineOverlay);
 
             // 绑定butoon事件
@@ -101,6 +104,7 @@ namespace WPFArcGISApp.ViewModel
                 // 清除
                 _PointOverlay.Graphics.Clear();
                 _LineOverlay.Graphics.Clear();
+                _onHoverPointOverlay.Graphics.Clear();
                 _clickedPoints.Clear();
                 _interpolatePoints.Clear();
                 _distances.Clear();
@@ -239,6 +243,15 @@ namespace WPFArcGISApp.ViewModel
                     loss -= diff; // 取负数表示减少值的总和
             }
             return loss;
+        }
+
+        static public void drawHoverPoint(int index)
+        {
+            _onHoverPointOverlay.Graphics.Clear();
+            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.Blue, 8);
+            Graphic pointGraphic = new Graphic(_interpolatePoints[index], PointSymbol);
+            _onHoverPointOverlay.Graphics.Add(pointGraphic);
+
         }
 
     }

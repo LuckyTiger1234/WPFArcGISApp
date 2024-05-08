@@ -1,7 +1,6 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using System;
-using System.IO;
 
 namespace WPFArcGISApp.ViewModel
 {
@@ -24,11 +23,22 @@ namespace WPFArcGISApp.ViewModel
             //await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.external = window");
         }
 
+        // 监听webview控件发送的消息
         void getLinePoint(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             String linePointIndex = e.TryGetWebMessageAsString();
             Console.WriteLine("\"linePointStr\"", linePointIndex);
+            int intIndex;
+            bool success = int.TryParse(linePointIndex, out intIndex);
+            if (success)
+            {
+                SceneViewModel.drawHoverPoint(intIndex);
 
+            }
+            else
+            {
+                Console.WriteLine(success);
+            }
         }
     }
 }
