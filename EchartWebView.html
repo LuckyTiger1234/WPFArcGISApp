@@ -9,7 +9,7 @@
 
 <body>
     <!-- echarts折线图 -->
-    <canvas id="elevationChart" width="550" height="250"></canvas>
+    <canvas id="elevationChart" width="550" height="230"></canvas>
     <!-- 统计数据 -->
     <div id="statics_warpper">
         <p>Elevation: Max: <span id="maxElevation"></span>(m), Min: <span id="minElevation"></span>(m), Avg: <span id="avgElevation"></span>(m), Gain: <span id="gainElevation"></span>(m), Loss: <span id="lossElevation"></span>(m)</p>
@@ -36,9 +36,27 @@
                     if (chartElement.length > 0) {
                         // 获取鼠标所在点的索引
                         var index = chartElement[0].index;
-                        window.chrome.webview.postMessage(index.toString());
+                        var params = {
+                            pointIndex: index,
+                            eventType: "onHover"
+                        }
+                        // 传递到viewmodel层
+                        window.chrome.webview.postMessage(JSON.stringify(params));
                     }
                 },
+                onClick: (e, chartElement) => {
+                    if (chartElement.length > 0) {
+                        // 获取鼠标所在点的索引
+                        var index = chartElement[0].index;
+                        var params = {
+                            pointIndex: index,
+                            eventType: "onClick"
+                        }
+                        // 传递到viewmodel层
+                        window.chrome.webview.postMessage(JSON.stringify(params));
+                    }
+                },
+
                 plugins: {
                     title: {
                         display: true,

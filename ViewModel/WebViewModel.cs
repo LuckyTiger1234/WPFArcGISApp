@@ -1,5 +1,6 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
+using Newtonsoft.Json;
 using System;
 
 namespace WPFArcGISApp.ViewModel
@@ -19,25 +20,30 @@ namespace WPFArcGISApp.ViewModel
             await _webView.EnsureCoreWebView2Async(null);
             // 在webview控件增加获取点信息的监听
             _webView.CoreWebView2.WebMessageReceived += getLinePoint;
-            // 注册 JavaScript 交互对象
-            //await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.external = window");
         }
 
         // 监听webview控件发送的消息
         void getLinePoint(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
-            String linePointIndex = e.TryGetWebMessageAsString();
-            Console.WriteLine("\"linePointStr\"", linePointIndex);
-            int intIndex;
-            bool success = int.TryParse(linePointIndex, out intIndex);
-            if (success)
-            {
-                SceneViewModel.drawHoverPoint(intIndex);
+            String paramsStr = e.TryGetWebMessageAsString();
 
-            }
-            else
+            dynamic paramsJson = JsonConvert.DeserializeObject (paramsStr);
+            Console.WriteLine("\"linePointStr\"", paramsJson);
+            
+            int intIndex = paramsJson.pointIndex;
+            string eventType = paramsJson.eventType;
+            switch (eventType)
             {
-                Console.WriteLine(success);
+                case "onHover":
+                    SceneViewModel.drawHoverPoint(intIndex);
+                    break;
+
+                case "onClick":
+                    SceneViewModel.moveCamera(intIndex);
+                    break;
+
+                default:
+                    break;
             }
         }
     }

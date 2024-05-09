@@ -23,7 +23,7 @@ namespace WPFArcGISApp.ViewModel
 
     class SceneViewModel : INotifyPropertyChanged
     {
-        private SceneView _sceneView;
+        static private SceneView _sceneView;
         private Surface _surface;
         private WebView2 _webView;
         private ProgressBar _loadingBar;
@@ -87,8 +87,9 @@ namespace WPFArcGISApp.ViewModel
             // 绑定butoon事件
             DrawLineCommand = new RelayCommand(DrawLine);
             // 绑定对球操作事件
-            _sceneView.MouseUp += OnSceneViewMouseUp;
+            _sceneView.MouseDown += OnSceneViewMouseDown;
             _sceneView.MouseDoubleClick += OnSceneViewDoubleClick;
+
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -122,13 +123,13 @@ namespace WPFArcGISApp.ViewModel
         }
 
 
-        private async void OnSceneViewMouseUp(object sender, MouseButtonEventArgs e)
+        private async void OnSceneViewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!_isDrawingLine)
                 return;
             // 获取鼠标点击的地理坐标点
             MapPoint clickedPoint = await _sceneView.ScreenToLocationAsync(e.GetPosition(_sceneView));
-            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.Blue, 8);
+            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.Red, 8);
 
             // 添加到图层中
             Graphic pointGraphic = new Graphic(clickedPoint, PointSymbol);
@@ -141,7 +142,7 @@ namespace WPFArcGISApp.ViewModel
         {
             // 获取鼠标点击的地理坐标点
             MapPoint clickedPoint = await _sceneView.ScreenToLocationAsync(e.GetPosition(_sceneView));
-            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.Blue, 8);
+            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.Red, 8);
 
             // 添加到图层中
             Graphic pointGraphic = new Graphic(clickedPoint, PointSymbol);
@@ -157,7 +158,7 @@ namespace WPFArcGISApp.ViewModel
             }
 
             // 将线条添加到图层中
-            SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.Red, 2);
+            SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.Blue, 2);
             Polyline line = new Polyline(_clickedPoints);
             Graphic polylineGraphic = new Graphic(line, lineSymbol);
 
@@ -248,9 +249,19 @@ namespace WPFArcGISApp.ViewModel
         static public void drawHoverPoint(int index)
         {
             _onHoverPointOverlay.Graphics.Clear();
-            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.Blue, 8);
+            SimpleMarkerSymbol PointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.White, 10);
             Graphic pointGraphic = new Graphic(_interpolatePoints[index], PointSymbol);
             _onHoverPointOverlay.Graphics.Add(pointGraphic);
+
+        }
+
+        static public void moveCamera(int index)
+        {
+            MapPoint targetPoint = _interpolatePoints[index];
+            Camera camera = new Camera(targetPoint, 7000, 355.0, 62, 0);
+
+            // 跳转视角
+            _sceneView.SetViewpointCameraAsync(camera);
 
         }
 
